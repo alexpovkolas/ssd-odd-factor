@@ -5,7 +5,7 @@
 #import <set>
 
 
-#define __PROFILE__
+//#define __PROFILE__
 
 #ifdef __PROFILE__
 
@@ -84,23 +84,19 @@ bool find_odd_factor(vector<set<vertex>> &edges, vector<pair<vertex, vertex>> &r
 bool find_odd_factor(vector<set<vertex>> &edges, vector<pair<vertex, vertex>> &result){
     set<vertex> visited;
 
-    int vertices_count = edges.size() - 1;
-    vector<vertex> difference;
+    set<vertex> all_vertices;
     for (int i = 1; i < edges.size(); ++i) {
-        difference.push_back(i);
+        all_vertices.insert(i);
     }
 
+    vector<vertex> difference;
+    difference.push_back(1);
+
+    // for each connected component
     while ( !difference.empty() ) {
         if (find_odd_factor(edges, result, visited, *difference.begin())) {
-
-            if (vertices_count != visited.size()) {
-                vector<vertex> next_difference;
-                set_difference(difference.begin(), difference.end(), visited.begin(), visited.end(), back_inserter(difference));
-                difference = next_difference;
-            } else {
-                return true;
-            }
-
+            difference.resize(0);
+            set_difference(all_vertices.begin(), all_vertices.end(), visited.begin(), visited.end(), back_inserter(difference));
         } else {
             return false;
         }
