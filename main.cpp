@@ -16,7 +16,7 @@
 using namespace std;
 
 
-void print_euler_path(vector<set<int>> &edges, vector<int> &result){
+bool find_odd_factor(vector<set<int>> &edges, vector<pair<int, int>> &result){
     int root = 0;
     stack<int> st;
 
@@ -51,13 +51,13 @@ int main() {
 #endif
 
     int n = 0;
-    cin >> n;
+    int m = 0;
+    cin >> n >> m;
 
-    vector<set<int>> edges(n + 1);
-    vector<int> result;
-    result.reserve(2*n-1);
+    vector<set<int>> edges(n);
+    vector<pair<int, int>> result;
 
-    for (int i = 0; i < n - 1; ++i) {
+    for (int i = 0; i < m; ++i) {
         int vertex1 = 0;
         int vertex2 = 0;
         cin >> vertex1 >> vertex2;
@@ -65,22 +65,14 @@ int main() {
         edges[vertex2].insert(vertex1);
     }
 
-    print_euler_path(edges, result);
-
-    for (int i = 0; i < result.size(); ++i) {
-        cout << result[i];
-        if (i < result.size() - 1) {
-            cout << " ";
-        } else {
-            cout << endl;
+    if (find_odd_factor(edges, result)) {
+        cout << result.size() << endl;
+        for (int i = 0; i < result.size(); ++i) {
+            cout << result[i].first << " " << result[i].second << endl;
         }
-    }
-
-#ifdef __PROFILE__
-
-#endif
-
-    cout << endl;
+    } else {
+        cout << -1 << endl;
+    };
 
     return 0;
 }
