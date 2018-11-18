@@ -30,15 +30,15 @@ void print_set(const set<vertex> &vertices, const string &name){
 #endif
 
 // find odd factor for connected component with "root"
-bool find_odd_factor(vector<set<vertex>> &edges, vector<pair<vertex, vertex>> &result, set<vertex> &visited, vertex root){
+bool find_odd_factor(vector<set<vertex>> &edges, vector<pair<vertex, vertex>> &result, set<vertex> &unvisited, vector<int> &factors){
     stack<pair<vertex, vertex>> path;
-    vector<int> factors(edges.size());
 
+    vertex root = *unvisited.begin();
     if (edges[root].empty()) {
         return false;
     } else {
         path.push(make_pair(-1, root));
-        visited.insert(root);
+        unvisited.erase(root);
     }
 
     while (!path.empty()) {
@@ -47,22 +47,14 @@ bool find_odd_factor(vector<set<vertex>> &edges, vector<pair<vertex, vertex>> &r
         vertex current = top.second;
 
         // check if we have unvisited vertices
-        vector<vertex> unvisited;
-        set_difference(edges[current].begin(), edges[current].end(), visited.begin(), visited.end(), back_inserter(unvisited));
+        vector<vertex> vertices_to_visit;
+        set_intersection(edges[current].begin(), edges[current].end(), unvisited.begin(), unvisited.end(), back_inserter(vertices_to_visit));
 
-        // remove edges to visited vertices
-        vector<vertex> to_remove;
-        set_intersection(edges[current].begin(), edges[current].end(), visited.begin(), visited.end(), back_inserter(to_remove));
-
-        for (int i = 0; i < to_remove.size(); ++i) {
-            edges[current].erase(to_remove[i]);
-        }
-
-        if (!unvisited.empty()) {
-            for (int i = 0; i < unvisited.size(); ++i) {
-                vertex unvisited_vertex = unvisited[i];
-                path.push(make_pair(current, unvisited_vertex));
-                visited.insert(unvisited_vertex);
+        if (!vertices_to_visit.empty()) {
+            for (int i = 0; i < vertices_to_visit.size(); ++i) {
+                vertex vertex_to_visit = vertices_to_visit[i];
+                path.push(make_pair(current, vertex_to_visit));
+                unvisited.erase(vertex_to_visit);
             }
         } else {
             path.pop();
@@ -82,22 +74,16 @@ bool find_odd_factor(vector<set<vertex>> &edges, vector<pair<vertex, vertex>> &r
 }
 
 bool find_odd_factor(vector<set<vertex>> &edges, vector<pair<vertex, vertex>> &result){
-    set<vertex> visited;
-
-    set<vertex> all_vertices;
+    set<vertex> unvisited;
+    vector<int> factors(edges.size());
     for (int i = 1; i < edges.size(); ++i) {
-        all_vertices.insert(i);
+        unvisited.insert(i);
     }
 
-    vector<vertex> difference;
-    difference.push_back(1);
-
+    int root = 1;
     // for each connected component
-    while ( !difference.empty() ) {
-        if (find_odd_factor(edges, result, visited, *difference.begin())) {
-            difference.resize(0);
-            set_difference(all_vertices.begin(), all_vertices.end(), visited.begin(), visited.end(), back_inserter(difference));
-        } else {
+    while ( !unvisited.empty() ) {
+        if (!find_odd_factor(edges, result, unvisited, factors)) {
             return false;
         }
     }
