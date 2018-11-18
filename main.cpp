@@ -46,17 +46,17 @@ bool find_odd_factor(vector<set<vertex>> &edges, vector<pair<vertex, vertex>> &r
         pair<vertex, vertex> top = path.top();
         vertex current = top.second;
 
-        // check if we have unvisited vertices
-        vector<vertex> vertices_to_visit;
-        set_intersection(edges[current].begin(), edges[current].end(), unvisited.begin(), unvisited.end(), back_inserter(vertices_to_visit));
-
-        if (!vertices_to_visit.empty()) {
-            for (int i = 0; i < vertices_to_visit.size(); ++i) {
-                vertex vertex_to_visit = vertices_to_visit[i];
-                path.push(make_pair(current, vertex_to_visit));
-                unvisited.erase(vertex_to_visit);
+        bool found = false;
+        for (auto v = edges[current].begin(); v != edges[current].end(); ++v) {
+            auto unvisited_v = unvisited.find(*v);
+            if (unvisited_v != unvisited.end()) {
+                path.push(make_pair(current, *v));
+                unvisited.erase(unvisited_v);
+                found = true;
             }
-        } else {
+        }
+
+        if (!found) {
             path.pop();
             if (path.empty()) {
                 return factors[top.second] % 2 == 1;
@@ -79,8 +79,7 @@ bool find_odd_factor(vector<set<vertex>> &edges, vector<pair<vertex, vertex>> &r
     for (int i = 1; i < edges.size(); ++i) {
         unvisited.insert(i);
     }
-
-    int root = 1;
+    
     // for each connected component
     while ( !unvisited.empty() ) {
         if (!find_odd_factor(edges, result, unvisited, factors)) {
@@ -104,6 +103,7 @@ int main() {
     // first vertex has index 1
     vector<set<vertex>> edges(n + 1);
     vector<pair<vertex, vertex>> result;
+    result.reserve(n);
 
     for (int i = 0; i < m; ++i) {
         vertex vertex1 = 0;
